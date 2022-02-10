@@ -11,8 +11,8 @@ android {
         applicationId = "com.yuk.fuckMiuiSystemUI"
         minSdk = 28
         targetSdk = 32
-        versionCode = 10
-        versionName = "1.0"
+        versionCode = 11
+        versionName = "1.1"
     }
     buildTypes {
         release {
