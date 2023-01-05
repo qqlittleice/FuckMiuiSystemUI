@@ -25,16 +25,8 @@
 -classobfuscationdictionary dict.txt
 -packageobfuscationdictionary dict.txt
 
--keep class * implements de.robv.android.xposed.IXposedHookLoadPackage {
-    public void *(de.robv.android.xposed.callbacks.XC_LoadPackage$LoadPackageParam);
-}
-
--keep class * implements de.robv.android.xposed.IXposedHookInitPackageResources {
-    public void *(de.robv.android.xposed.callbacks.XC_InitPackageResources$InitPackageResourcesParam);
-}
-
--keep class * implements de.robv.android.xposed.IXposedHookZygoteInit {
-    public void *(de.robv.android.xposed.IXposedHookZygoteInit$StartupParam);
+-keep class com.yuk.fuckMiuiSystemUI.XposedInit {
+    <init>();
 }
 
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
