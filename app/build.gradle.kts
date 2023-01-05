@@ -1,18 +1,18 @@
+import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 
 plugins {
     id("com.android.application")
-    id("kotlin-android")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
-    compileSdk = 32
-    buildToolsVersion = "32.0.0"
+    compileSdk = 33
     defaultConfig {
         applicationId = "com.yuk.fuckMiuiSystemUI"
-        minSdk = 28
-        targetSdk = 32
-        versionCode = 11
-        versionName = "1.1"
+        minSdk = 31
+        targetSdk = 33
+        versionCode = 12
+        versionName = "1.2"
     }
     buildTypes {
         release {
@@ -25,13 +25,29 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.majorVersion
+    }
     packagingOptions {
+        resources {
+            excludes += "/META-INF/**"
+            excludes += "/kotlin/**"
+            excludes += "/*.txt"
+            excludes += "/*.bin"
+            excludes += "/*.json"
+        }
         dex {
             useLegacyPackaging = true
+        }
+        applicationVariants.all {
+            outputs.all {
+                (this as BaseVariantOutputImpl).outputFileName = "FuckMiuiSystemUI-$versionName($versionCode)-$name.apk"
+            }
         }
     }
 }
 
 dependencies {
     compileOnly("de.robv.android.xposed:api:82")
+    implementation("com.github.kyuubiran:EzXHelper:1.0.3")
 }

@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.yuk.fuckMiuiSystemUI">
 
     <application
-        android:icon="@mipmap/ic_launcher"
-        android:label="Miui 时间显秒"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true">
+        android:label="FuckMiuiSystemUI"
+        tools:ignore="MissingApplicationIcon">
         <meta-data
             android:name="xposedscope"
             android:resource="@array/xposed_scope" />
-
         <meta-data
             android:name="xposeddescription"
-            android:value="字面意思" />
-
+            android:value="MIUI 状态栏时间显秒" />
         <meta-data
             android:name="xposedminversion"
-            android:value="82" />
+            android:value="93" />
     </application>
 </manifest>

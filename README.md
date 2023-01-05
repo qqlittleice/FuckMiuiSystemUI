@@ -1,4 +1,4 @@
 # FuckMiuiSystemUI
- Android 12 - Miui 时间显秒
+ [Xposed] MIUI 状态栏时间显秒
 
-请移步 [SimplicityTools](https://github.com/LittleTurtle2333/SimplicityTools)
+- 请移步 [WooBoxForMIUI](https://github.com/Simplicity-Team/WooBoxForMIUI)

@@ -4,58 +4,83 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.provider.Settings
-import android.util.AttributeSet
 import android.widget.TextView
+import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
+import com.github.kyuubiran.ezxhelper.utils.findConstructor
+import com.github.kyuubiran.ezxhelper.utils.findMethod
+import com.github.kyuubiran.ezxhelper.utils.hookAfter
+import com.github.kyuubiran.ezxhelper.utils.paramCount
 import de.robv.android.xposed.IXposedHookLoadPackage
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import java.lang.reflect.Method
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
+import java.util.Timer
+import java.util.TimerTask
 
 class XposedInit : IXposedHookLoadPackage {
 
+    @SuppressLint("SimpleDateFormat", "SetTextI18n")
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
+        EzXHelperInit.initHandleLoadPackage(lpparam)
+        EzXHelperInit.setEzClassLoader(lpparam.classLoader)
         when (lpparam.packageName) {
             "com.android.systemui" -> {
-                var c :Context? = null
-                val classIfExists = XposedHelpers.findClassIfExists("com.android.systemui.statusbar.views.MiuiClock", lpparam.classLoader)
-                XposedHelpers.findAndHookConstructor(classIfExists, Context::class.java, AttributeSet::class.java, Integer.TYPE,
-                    object : XC_MethodHook() {
-                        override fun afterHookedMethod(param: MethodHookParam) {
-                            c = param.args[0] as Context
-                            val textV = param.thisObject as TextView
-                            val d: Method = textV.javaClass.getDeclaredMethod("updateTime")
-                            val r = Runnable {
-                                d.isAccessible = true
-                                d.invoke(textV)
-                            }
-                            class T : TimerTask() {
-                                override fun run() {
-                                    Handler(textV.context.mainLooper).post(r)
+                try {
+                    var c: Context? = null
+                    findConstructor("com.android.systemui.statusbar.views.MiuiClock") {
+                        paramCount == 3
+                    }.hookAfter {
+                        try {
+                            c = it.args[0] as Context
+                            val textV = it.thisObject as TextView?
+                            if (textV != null) {
+                                val d: Method = textV.javaClass.getDeclaredMethod("updateTime")
+                                val r = Runnable {
+                                    d.isAccessible = true
+                                    d.invoke(textV)
+                                }
+
+                                class T : TimerTask() {
+                                    override fun run() {
+                                        Handler(textV.context.mainLooper).post(r)
+                                    }
+                                }
+                                if (textV.resources.getResourceEntryName(textV.id) == "clock") {
+                                    Timer().scheduleAtFixedRate(T(), 1000 - System.currentTimeMillis() % 1000, 1000)
                                 }
                             }
-                            if (textV.resources.getResourceEntryName(textV.id) == "clock")
-                                Timer().scheduleAtFixedRate(T(), 1000 - System.currentTimeMillis() % 1000, 1000)
+                        } catch (_: Exception) {
                         }
                     }
-                )
-                XposedHelpers.findAndHookMethod(classIfExists, "updateTime",
-                    object : XC_MethodHook() {
-                        @SuppressLint("SetTextI18n", "SimpleDateFormat")
-                        override fun afterHookedMethod(param: MethodHookParam) {
-                            val textV = param.thisObject as TextView
-                            if (textV.resources.getResourceEntryName(textV.id) == "clock") {
+                    try {
+                        findMethod("com.android.systemui.statusbar.views.MiuiClock") {
+                            name == "updateTime"
+                        }.hookAfter {
+                            val textV = it.thisObject as TextView?
+                            if (textV != null && c != null) {
                                 val t = Settings.System.getString(c!!.contentResolver, Settings.System.TIME_12_24)
-                                if (t == "24")
-                                    textV.text =  SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().time)
-                                else
-                                    textV.text = textV.text.toString() + SimpleDateFormat(":ss").format(Calendar.getInstance().time)
+                                if (textV.resources.getResourceEntryName(textV.id) == "clock") {
+                                    if (t == "24") {
+                                        textV.text = SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().time)
+                                    } else {
+                                        var string = ""
+                                        if (Locale.getDefault().country == "US") {
+                                            string = textV.text.toString().substring(textV.text.toString().length - 3, textV.text.toString().length)
+                                        }
+                                        val text = textV.text.toString().replace("AM", "").replace("PM", "").replace(" ", "")
+                                        textV.text = text + SimpleDateFormat(":ss").format(Calendar.getInstance().time) + string
+                                    }
+                                }
                             }
                         }
-                    })
+                    } catch (_: Exception) {
+                    }
+                } catch (_: Exception) {
+                }
             }
+
             else -> return
         }
     }
