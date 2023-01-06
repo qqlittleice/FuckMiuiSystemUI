@@ -6,6 +6,9 @@
     <application
         android:label="FuckMiuiSystemUI"
         tools:ignore="MissingApplicationIcon">
+                <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
         <meta-data
             android:name="xposedscope"
             android:resource="@array/xposed_scope" />
